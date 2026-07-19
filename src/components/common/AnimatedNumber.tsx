@@ -5,7 +5,7 @@
  * Used for stats display to create an engaging counting effect.
  */
 import React, { useEffect, useState } from 'react';
-import { Text, TextStyle } from 'react-native';
+import { Text, TextStyle, StyleProp } from 'react-native';
 import { colors, typography } from '../../theme';
 
 interface AnimatedNumberProps {
@@ -14,7 +14,7 @@ interface AnimatedNumberProps {
   prefix?: string;
   suffix?: string;
   decimals?: number;
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   formatter?: (value: number) => string;
 }
 

@@ -5,7 +5,7 @@
  * Supports pressable and non-pressable variants.
  */
 import React from 'react';
-import { TouchableOpacity, View, StyleSheet, ViewStyle } from 'react-native';
+import { TouchableOpacity, View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { colors, spacing, borderRadius } from '../../theme';
 import { useScalePress } from '../../hooks/useAnimations';
@@ -15,7 +15,7 @@ const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 interface CardProps {
   children: React.ReactNode;
   onPress?: () => void;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   variant?: 'default' | 'elevated' | 'outlined' | 'glow';
   padding?: 'none' | 'sm' | 'md' | 'lg';
 }
