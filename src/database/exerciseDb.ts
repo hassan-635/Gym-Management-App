@@ -1,10 +1,10 @@
 /**
- * database/exerciseDb.ts — Exercise CRUD operations
+ * database/exerciseDb.ts — Exercise CRUD operations (Zustand Adapter)
  * 
  * All database operations for exercise management.
- * Exercises are user-created and stored locally in SQLite.
+ * Exercises are user-created and stored locally via Zustand.
  */
-import { getDatabase } from './database';
+import { useDataStore } from '../store/useDataStore';
 import { Exercise, ExerciseFormData, MuscleGroup } from '../types/exercise';
 import { generateUUID } from '../utils/helpers';
 
@@ -12,107 +12,107 @@ import { generateUUID } from '../utils/helpers';
  * Get all exercises, optionally filtered by muscle group.
  */
 export const getAllExercises = (muscleGroup?: MuscleGroup): Exercise[] => {
-  const db = getDatabase();
+  const state = useDataStore.getState();
+  let exercises = state.exercises;
   
   if (muscleGroup) {
-    return db.getAllSync<Exercise>(
-      'SELECT id, name, muscle_group as muscleGroup, is_custom as isCustom, created_at as createdAt FROM exercises WHERE muscle_group = ? ORDER BY name ASC',
-      [muscleGroup]
-    );
+    exercises = exercises.filter(e => e.muscleGroup === muscleGroup);
   }
   
-  return db.getAllSync<Exercise>(
-    'SELECT id, name, muscle_group as muscleGroup, is_custom as isCustom, created_at as createdAt FROM exercises ORDER BY name ASC'
-  );
+  return [...exercises].sort((a, b) => a.name.localeCompare(b.name));
 };
 
 /**
  * Get a single exercise by ID.
  */
 export const getExerciseById = (id: string): Exercise | null => {
-  const db = getDatabase();
-  return db.getFirstSync<Exercise>(
-    'SELECT id, name, muscle_group as muscleGroup, is_custom as isCustom, created_at as createdAt FROM exercises WHERE id = ?',
-    [id]
-  );
+  const state = useDataStore.getState();
+  return state.exercises.find(e => e.id === id) || null;
 };
 
 /**
  * Create a new exercise.
  */
 export const createExercise = (data: ExerciseFormData): Exercise => {
-  const db = getDatabase();
   const id = generateUUID();
   const createdAt = new Date().toISOString();
 
-  db.runSync(
-    'INSERT INTO exercises (id, name, muscle_group, is_custom, created_at) VALUES (?, ?, ?, 1, ?)',
-    [id, data.name.trim(), data.muscleGroup, createdAt]
-  );
-
-  return {
+  const exercise: Exercise = {
     id,
     name: data.name.trim(),
     muscleGroup: data.muscleGroup,
     isCustom: true,
     createdAt,
   };
+
+  useDataStore.getState().addExercise(exercise);
+  return exercise;
 };
 
 /**
  * Update an existing exercise.
  */
 export const updateExercise = (id: string, data: ExerciseFormData): void => {
-  const db = getDatabase();
-  db.runSync(
-    'UPDATE exercises SET name = ?, muscle_group = ? WHERE id = ?',
-    [data.name.trim(), data.muscleGroup, id]
-  );
+  const exercise = getExerciseById(id);
+  if (exercise) {
+    useDataStore.getState().updateExercise({
+      ...exercise,
+      name: data.name.trim(),
+      muscleGroup: data.muscleGroup,
+    });
+  }
 };
 
 /**
  * Delete an exercise and all related history.
- * Cascade delete handles workout_exercises and exercise_history.
+ * Handles cascade deletion from workouts and history manually.
  */
 export const deleteExercise = (id: string): void => {
-  const db = getDatabase();
-  db.runSync('DELETE FROM exercises WHERE id = ?', [id]);
+  const state = useDataStore.getState();
+  
+  state.deleteExercise(id);
+  
+  // Cascade delete workout_exercises
+  const updatedWorkouts = state.workouts.map(workout => ({
+    ...workout,
+    exercises: workout.exercises.filter(we => we.exerciseId !== id)
+  }));
+  state.setWorkouts(updatedWorkouts);
+  
+  // Cascade delete history
+  const updatedHistory = state.exerciseHistory.filter(h => h.exerciseId !== id);
+  state.setExerciseHistory(updatedHistory);
 };
 
 /**
  * Search exercises by name (case-insensitive).
  */
 export const searchExercises = (query: string): Exercise[] => {
-  const db = getDatabase();
-  return db.getAllSync<Exercise>(
-    'SELECT id, name, muscle_group as muscleGroup, is_custom as isCustom, created_at as createdAt FROM exercises WHERE name LIKE ? ORDER BY name ASC',
-    [`%${query}%`]
-  );
+  const state = useDataStore.getState();
+  const lowerQuery = query.toLowerCase();
+  
+  return state.exercises
+    .filter(e => e.name.toLowerCase().includes(lowerQuery))
+    .sort((a, b) => a.name.localeCompare(b.name));
 };
 
 /**
  * Check if an exercise with the given name already exists.
  */
 export const exerciseExists = (name: string): boolean => {
-  const db = getDatabase();
-  const result = db.getFirstSync<{ count: number }>(
-    'SELECT COUNT(*) as count FROM exercises WHERE LOWER(name) = LOWER(?)',
-    [name.trim()]
-  );
-  return (result?.count ?? 0) > 0;
+  const state = useDataStore.getState();
+  const lowerName = name.trim().toLowerCase();
+  return state.exercises.some(e => e.name.toLowerCase() === lowerName);
 };
 
 /**
  * Get exercise count by muscle group (for stats).
  */
 export const getExerciseCountByMuscle = (): Record<string, number> => {
-  const db = getDatabase();
-  const rows = db.getAllSync<{ muscleGroup: string; count: number }>(
-    'SELECT muscle_group as muscleGroup, COUNT(*) as count FROM exercises GROUP BY muscle_group'
-  );
+  const state = useDataStore.getState();
   
-  return rows.reduce((acc, row) => {
-    acc[row.muscleGroup] = row.count;
+  return state.exercises.reduce((acc, exercise) => {
+    acc[exercise.muscleGroup] = (acc[exercise.muscleGroup] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 };
