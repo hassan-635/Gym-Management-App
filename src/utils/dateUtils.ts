@@ -122,14 +122,11 @@ export const calculateStreak = (
     const dateStr = currentDate.format('YYYY-MM-DD');
     const dow = currentDate.day();
 
-    if (restDays.includes(dow)) {
-      // Rest day — skip, don't break streak
-      currentDate = currentDate.subtract(1, 'day');
-      continue;
-    }
-
     if (completedDates.includes(dateStr)) {
       streak++;
+      currentDate = currentDate.subtract(1, 'day');
+    } else if (restDays.includes(dow)) {
+      // Rest day and didn't workout — skip, don't break streak
       currentDate = currentDate.subtract(1, 'day');
     } else {
       // Workout day not completed — streak broken
@@ -138,6 +135,54 @@ export const calculateStreak = (
   }
 
   return streak;
+};
+
+/**
+ * Calculate the longest streak ever achieved.
+ */
+export const calculateLongestStreak = (
+  completedDates: string[],
+  restDays: number[] = [5] // Friday by default
+): number => {
+  if (completedDates.length === 0) return 0;
+
+  // We can just iterate backwards from the most recent workout to the oldest
+  // The logic is similar, but we check gaps between workouts.
+  
+  // Sort dates descending
+  const sorted = [...completedDates].sort((a, b) => b.localeCompare(a));
+  
+  let maxStreak = 0;
+  let currentStreak = 0;
+  
+  // Start from the most recent workout
+  let currentDate = dayjs(sorted[0]);
+
+  // We will loop back in time indefinitely until we run out of workouts to process.
+  // Actually, we can just walk backwards day by day from the newest workout 
+  // to the oldest workout.
+  const oldestDate = dayjs(sorted[sorted.length - 1]);
+  const daysDiff = currentDate.diff(oldestDate, 'day') + 1; // +1 to include the oldest day
+
+  for (let i = 0; i < daysDiff + 5; i++) { // small buffer
+    const dateStr = currentDate.format('YYYY-MM-DD');
+    const dow = currentDate.day();
+
+    if (sorted.includes(dateStr)) {
+      currentStreak++;
+      if (currentStreak > maxStreak) maxStreak = currentStreak;
+      currentDate = currentDate.subtract(1, 'day');
+    } else if (restDays.includes(dow)) {
+      // Rest day without a workout doesn't break the streak
+      currentDate = currentDate.subtract(1, 'day');
+    } else {
+      // Streak broken
+      currentStreak = 0;
+      currentDate = currentDate.subtract(1, 'day');
+    }
+  }
+
+  return maxStreak;
 };
 
 // ── Date Ranges ──
