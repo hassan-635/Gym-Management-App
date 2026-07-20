@@ -53,6 +53,11 @@ export const ExerciseRow: React.FC<ExerciseRowProps> = ({
             </Text>
             <View style={styles.metaRow}>
               <MuscleGroupBadge muscleGroup={exercise.muscleGroup} />
+              {exercise.targetMinReps !== undefined && exercise.targetMaxReps !== undefined && (
+                <Text style={styles.targetReps}>
+                  🎯 {exercise.targetMinReps}-{exercise.targetMaxReps} reps
+                </Text>
+              )}
               <Text style={styles.progressText}>{progressText} sets</Text>
             </View>
           </View>
@@ -159,6 +164,15 @@ const styles = StyleSheet.create({
   progressText: {
     ...typography.caption,
     color: colors.text.muted,
+  },
+  targetReps: {
+    ...typography.caption,
+    color: colors.accent.info,
+    backgroundColor: colors.accent.infoMuted,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: 2,
+    borderRadius: borderRadius.xs,
+    overflow: 'hidden',
   },
   headerRight: {
     flexDirection: 'row',
