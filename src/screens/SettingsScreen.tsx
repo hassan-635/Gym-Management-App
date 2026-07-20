@@ -26,7 +26,7 @@ import { Button } from '../components/common/Button';
 import { MuscleGroupBadge } from '../components/common/Badge';
 import { formatTime } from '../utils/dateUtils';
 import { TIMER, APP_VERSION } from '../utils/constants';
-import { resetDatabase } from '../database/database';
+import { useDataStore } from '../store/useDataStore';
 
 export const SettingsScreen: React.FC = () => {
   const { settings, updateSettings, toggleWorkoutDay, addExerciseToDay, removeExerciseFromDay } = useSettingsStore();
@@ -64,7 +64,7 @@ export const SettingsScreen: React.FC = () => {
           text: 'Reset Everything',
           style: 'destructive',
           onPress: async () => {
-            await resetDatabase();
+            useDataStore.getState().resetData();
             Alert.alert('Done', 'All data has been reset.');
           },
         },
