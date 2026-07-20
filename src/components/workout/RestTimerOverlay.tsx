@@ -18,7 +18,6 @@ const CIRCLE_SIZE = width * 0.6;
 export const RestTimerOverlay: React.FC = () => {
   const timer = useRestTimer();
 
-  if (!timer.isVisible) return null;
 
   const timeDisplay = formatTimerDisplay(timer.remainingSeconds);
   const progressPercent = Math.round(timer.progress * 100);
@@ -34,6 +33,8 @@ export const RestTimerOverlay: React.FC = () => {
       },
     ],
   }));
+
+  if (!timer.isVisible) return null;
 
   return (
     <View style={styles.overlay}>
