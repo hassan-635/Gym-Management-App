@@ -35,6 +35,8 @@ export const createWorkout = (
       isCompleted: false,
     }));
 
+    const baseExercise = useDataStore.getState().exercises.find(e => e.id === exercise.id);
+
     return {
       id: workoutExerciseId,
       workoutId,
@@ -44,6 +46,8 @@ export const createWorkout = (
       sets,
       isCompleted: false,
       sortOrder: index,
+      targetMinReps: baseExercise?.targetMinReps,
+      targetMaxReps: baseExercise?.targetMaxReps,
     };
   });
 
@@ -203,6 +207,8 @@ export const addExerciseToWorkout = (
     isCompleted: false,
   }));
 
+  const baseExercise = useDataStore.getState().exercises.find(e => e.id === exercise.id);
+
   const newExercise: WorkoutExercise = {
     id: workoutExerciseId,
     workoutId,
@@ -212,6 +218,8 @@ export const addExerciseToWorkout = (
     sets,
     isCompleted: false,
     sortOrder,
+    targetMinReps: baseExercise?.targetMinReps,
+    targetMaxReps: baseExercise?.targetMaxReps,
   };
 
   const state = useDataStore.getState();
