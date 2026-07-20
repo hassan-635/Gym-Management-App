@@ -47,6 +47,8 @@ export const ExercisesScreen: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
   const [newMuscleGroup, setNewMuscleGroup] = useState<MuscleGroup>('Chest');
+  const [newMinReps, setNewMinReps] = useState('');
+  const [newMaxReps, setNewMaxReps] = useState('');
 
   useFocusEffect(
     useCallback(() => {
@@ -63,6 +65,8 @@ export const ExercisesScreen: React.FC = () => {
     const result = addExercise({
       name: newExerciseName.trim(),
       muscleGroup: newMuscleGroup,
+      targetMinReps: newMinReps ? parseInt(newMinReps) : undefined,
+      targetMaxReps: newMaxReps ? parseInt(newMaxReps) : undefined,
     });
 
     if (result === null) {
@@ -71,6 +75,8 @@ export const ExercisesScreen: React.FC = () => {
     }
 
     setNewExerciseName('');
+    setNewMinReps('');
+    setNewMaxReps('');
     setShowAddModal(false);
   };
 
@@ -230,6 +236,28 @@ export const ExercisesScreen: React.FC = () => {
             ))}
           </View>
 
+          {/* Target Reps Inputs */}
+          <Text style={[styles.inputLabel, { marginTop: spacing.lg }]}>Target Rep Range (Optional)</Text>
+          <View style={styles.repsRow}>
+            <TextInput
+              style={[styles.modalInput, styles.repInput]}
+              placeholder="Min"
+              placeholderTextColor={colors.text.muted}
+              value={newMinReps}
+              onChangeText={setNewMinReps}
+              keyboardType="number-pad"
+            />
+            <Text style={styles.repsSeparator}>to</Text>
+            <TextInput
+              style={[styles.modalInput, styles.repInput]}
+              placeholder="Max"
+              placeholderTextColor={colors.text.muted}
+              value={newMaxReps}
+              onChangeText={setNewMaxReps}
+              keyboardType="number-pad"
+            />
+          </View>
+
           {/* Add Button */}
           <Button
             title="Add Exercise"
@@ -375,5 +403,18 @@ const styles = StyleSheet.create({
   muscleGroupOptionText: {
     ...typography.captionMedium,
     color: colors.text.secondary,
+  },
+  repsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  repInput: {
+    flex: 1,
+    textAlign: 'center',
+  },
+  repsSeparator: {
+    ...typography.body,
+    color: colors.text.muted,
   },
 });
