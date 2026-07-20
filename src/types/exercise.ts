@@ -25,12 +25,18 @@ export interface Exercise {
   isCustom: boolean;
   /** ISO date string of creation */
   createdAt: string;
+  /** Target minimum reps (display only) */
+  targetMinReps?: number;
+  /** Target maximum reps (display only) */
+  targetMaxReps?: number;
 }
 
 /** Form data for creating/editing an exercise */
 export interface ExerciseFormData {
   name: string;
   muscleGroup: MuscleGroup;
+  targetMinReps?: number;
+  targetMaxReps?: number;
 }
 
 /** Exercise with its progressive overload data */
