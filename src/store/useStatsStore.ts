@@ -8,7 +8,7 @@ import { create } from 'zustand';
 import { WorkoutStats, WeeklyFrequency, MonthlyVolume, MuscleDistribution } from '../types/stats';
 import * as historyDb from '../database/historyDb';
 import * as workoutDb from '../database/workoutDb';
-import { calculateStreak } from '../utils/dateUtils';
+import { calculateStreak, calculateLongestStreak } from '../utils/dateUtils';
 import { colors } from '../theme/colors';
 import { DAYS_SHORT } from '../utils/constants';
 
@@ -57,6 +57,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
       // ── Streak Calculation ──
       const completedDates = workoutDb.getCompletedWorkoutDates();
       const currentStreak = calculateStreak(completedDates);
+      const longestStreak = calculateLongestStreak(completedDates);
 
       // ── Most Trained Muscle ──
       const mostTrainedMuscle = historyDb.getMostTrainedMuscle();
@@ -70,7 +71,7 @@ export const useStatsStore = create<StatsState>((set, get) => ({
         totalWorkouts: overallStats.totalWorkouts,
         completedWorkouts: overallStats.completedWorkouts,
         currentStreak,
-        longestStreak: currentStreak, // TODO: Track separately
+        longestStreak,
         mostTrainedMuscle,
         consistencyPercentage: consistency,
         totalVolumeLiftedKg: overallStats.totalVolume,
