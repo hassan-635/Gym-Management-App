@@ -39,6 +39,10 @@ export interface WorkoutExercise {
   isCompleted: boolean;
   /** Display order within the workout */
   sortOrder: number;
+  /** Target minimum reps (display only) */
+  targetMinReps?: number;
+  /** Target maximum reps (display only) */
+  targetMaxReps?: number;
 }
 
 /** A complete workout session for a specific day */
