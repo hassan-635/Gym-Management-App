@@ -43,6 +43,8 @@ export const createExercise = (data: ExerciseFormData): Exercise => {
     muscleGroup: data.muscleGroup,
     isCustom: true,
     createdAt,
+    targetMinReps: data.targetMinReps,
+    targetMaxReps: data.targetMaxReps,
   };
 
   useDataStore.getState().addExercise(exercise);
@@ -59,6 +61,8 @@ export const updateExercise = (id: string, data: ExerciseFormData): void => {
       ...exercise,
       name: data.name.trim(),
       muscleGroup: data.muscleGroup,
+      targetMinReps: data.targetMinReps,
+      targetMaxReps: data.targetMaxReps,
     });
   }
 };
