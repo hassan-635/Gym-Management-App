@@ -102,11 +102,28 @@ export const StatsScreen: React.FC = () => {
               color={colors.accent.warning}
             />
             <StatBlock
+              icon="trophy"
+              label="Longest Streak"
+              value={stats.longestStreak}
+              suffix=" days"
+              color={colors.accent.warningMuted}
+            />
+          </View>
+
+          <View style={styles.statsRow}>
+            <StatBlock
               icon="speedometer"
               label="Consistency"
               value={stats.consistencyPercentage}
               suffix="%"
               color={colors.accent.info}
+            />
+            <StatBlock
+              icon="time"
+              label="Avg Duration"
+              value={stats.averageDurationMinutes}
+              suffix=" min"
+              color={colors.primary.light}
             />
           </View>
 
